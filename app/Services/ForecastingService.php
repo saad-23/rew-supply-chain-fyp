@@ -7,57 +7,145 @@ use App\Models\DemandForecast;
 use App\Models\Sale;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class ForecastingService
 {
+    private $mlServiceUrl;
+    private $mlServiceEnabled;
+
+    public function __construct()
+    {
+        $this->mlServiceUrl = env('ML_SERVICE_URL', 'http://localhost:5000');
+        $this->mlServiceEnabled = env('ML_SERVICE_ENABLED', true);
+    }
+
     /**
-     * Generate forecasts for all products using a mock AI model (Simple Moving Average for now)
-     * Real implementation would call a Python script via Process or HTTP
+     * Generate forecasts for all products using Python ML Service (Prophet Model)
+     * Falls back to simple statistical method if ML service is unavailable
      */
     public function generateForecasts()
     {
         $products = Product::all();
         
         foreach ($products as $product) {
-            // Get Sales History
-            $history = Sale::where('product_id', $product->id)
-                ->where('sale_date', '>=', Carbon::now()->subDays(30))
-                ->get();
+            try {
+                if ($this->mlServiceEnabled && $this->isMLServiceAvailable()) {
+                    // Use Python ML Service with Prophet model
+                    $this->generateMLForecasts($product);
+                } else {
+                    // Fallback to simple statistical method
+                    Log::info("ML Service unavailable, using fallback for product {$product->id}");
+                    $this->generateSimpleForecasts($product);
+                }
+            } catch (\Exception $e) {
+                Log::error("Error forecasting product {$product->id}: " . $e->getMessage());
+                // Use fallback on error
+                $this->generateSimpleForecasts($product);
+            }
+        }
+    }
 
-            $dailyAvg = 10; // Default baseline
-            
-            if ($history->count() > 0) {
-                $totalQty = $history->sum('quantity');
-                $days = $history->groupBy('sale_date')->count(); // distinct days sold
-                if($days > 0) {
-                    $dailyAvg = $totalQty / max($days, 1); 
+    /**
+     * Generate forecasts using Python ML Service (Prophet)
+     */
+    public function generateMLForecasts(Product $product, int $days = 30)
+    {
+        try {
+            $response = Http::timeout(60)->post("{$this->mlServiceUrl}/api/forecast", [
+                'product_id' => $product->id,
+                'days' => $days
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                
+                if ($data['success'] ?? false) {
+                    $forecasts = $data['forecasts'] ?? [];
+                    
+                    foreach ($forecasts as $forecast) {
+                        DemandForecast::updateOrCreate(
+                            [
+                                'product_id' => $product->id,
+                                'forecast_date' => $forecast['date'],
+                            ],
+                            [
+                                'predicted_quantity' => $forecast['predicted_quantity'],
+                                'model_used' => 'Prophet ML',
+                                'confidence_score' => round($forecast['confidence_score'] * 100)
+                            ]
+                        );
+                    }
+                    
+                    Log::info("Generated ML forecasts for product {$product->id}");
+                    return true;
                 }
             }
+            
+            return false;
+        } catch (\Exception $e) {
+            Log::error("ML Service error for product {$product->id}: " . $e->getMessage());
+            return false;
+        }
+    }
 
-            // Generate next 30 days forecast
-            for ($i = 1; $i <= 30; $i++) {
-                $futureDate = Carbon::now()->addDays($i);
-                
-                // Logic: Rolling Average + Random fluctuation (Noise) + Seasonality
-                $noise = rand(-2, 5); // Random market noise
-                $seasonality = $futureDate->dayOfWeek > 4 ? 1.2 : 1.0; // Higher on weekends
-                
-                $predictedQty = round(($dailyAvg + $noise) * $seasonality);
-                // Ensure non-negative
-                $predictedQty = max((int)$predictedQty, 0);
-                
-                DemandForecast::updateOrCreate(
-                    [
-                        'product_id' => $product->id,
-                        'forecast_date' => $futureDate->toDateString(),
-                    ],
-                    [
-                        'predicted_quantity' => $predictedQty,
-                        'model_used' => 'Simulated LSTM',
-                        'confidence_score' => rand(85, 99)
-                    ]
-                );
+    /**
+     * Fallback: Simple statistical forecasting (Moving Average)
+     * Used when ML service is unavailable
+     */
+    private function generateSimpleForecasts(Product $product, int $days = 30)
+    {
+        // Get Sales History
+        $history = Sale::where('product_id', $product->id)
+            ->where('sale_date', '>=', Carbon::now()->subDays(30))
+            ->get();
+
+        $dailyAvg = 10; // Default baseline
+        
+        if ($history->count() > 0) {
+            $totalQty = $history->sum('quantity');
+            $uniqueDays = $history->groupBy('sale_date')->count();
+            if($uniqueDays > 0) {
+                $dailyAvg = $totalQty / max($uniqueDays, 1); 
             }
+        }
+
+        // Generate forecasts
+        for ($i = 1; $i <= $days; $i++) {
+            $futureDate = Carbon::now()->addDays($i);
+            
+            // Simple logic: Moving Average + Seasonality
+            $noise = rand(-2, 5);
+            $seasonality = $futureDate->dayOfWeek > 4 ? 1.2 : 1.0;
+            
+            $predictedQty = round(($dailyAvg + $noise) * $seasonality);
+            $predictedQty = max((int)$predictedQty, 0);
+            
+            DemandForecast::updateOrCreate(
+                [
+                    'product_id' => $product->id,
+                    'forecast_date' => $futureDate->toDateString(),
+                ],
+                [
+                    'predicted_quantity' => $predictedQty,
+                    'model_used' => 'Simple Moving Average',
+                    'confidence_score' => rand(70, 85)
+                ]
+            );
+        }
+    }
+
+    /**
+     * Check if ML Service is available
+     */
+    private function isMLServiceAvailable(): bool
+    {
+        try {
+            $response = Http::timeout(5)->get("{$this->mlServiceUrl}/api/health");
+            return $response->successful();
+        } catch (\Exception $e) {
+            return false;
         }
     }
 

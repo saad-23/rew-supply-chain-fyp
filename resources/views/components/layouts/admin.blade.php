@@ -260,7 +260,7 @@
                      class="mt-1 space-y-1 overflow-hidden"
                      :class="{ 'pl-11': sidebarOpen, 'bg-slate-800/50 rounded-lg py-1 mx-2': !sidebarOpen }">
                     <a href="{{ route('products.index') }}" class="block py-2 px-3 rounded-md text-sm {{ request()->routeIs('products.index') ? 'text-white bg-indigo-500/10' : 'text-slate-400 hover:text-white hover:bg-slate-700/50' }} transition-colors">
-                        Catalog
+                        products list
                     </a>
                     <a href="{{ route('products.create') }}" class="block py-2 px-3 rounded-md text-sm {{ request()->routeIs('products.create') ? 'text-white bg-indigo-500/10' : 'text-slate-400 hover:text-white hover:bg-slate-700/50' }} transition-colors">
                         Add New

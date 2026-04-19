@@ -3,6 +3,7 @@
 namespace App\Livewire\Operations;
 
 use App\Models\Delivery;
+use App\Models\Product;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Http;
@@ -18,6 +19,10 @@ class CreateDelivery extends Component
     public $delivery_date;
     public $priority = 1;
     public $suggestions = [];
+    public $product_id;
+    public $quantity = 1;
+    public $notes;
+    public $showAdvanced = false;
 
     public function mount()
     {
@@ -89,6 +94,9 @@ class CreateDelivery extends Component
         'longitude' => 'required|numeric|between:-180,180',
         'delivery_date' => 'required|date',
         'priority' => 'required|in:1,2',
+        'product_id' => 'required|exists:products,id',
+        'quantity' => 'required|integer|min:1',
+        'notes' => 'nullable|string|max:500',
     ];
 
     // Geocode address using Photon (Komoot) for better fuzzy search
@@ -147,17 +155,23 @@ class CreateDelivery extends Component
             'longitude' => $this->longitude,
             'status' => 'pending',
             'delivery_date' => $this->delivery_date,
-            'priority' => $this->priority
+            'priority' => $this->priority,
+            'product_id' => $this->product_id,
+            'quantity' => $this->quantity,
+            'notes' => $this->notes,
         ]);
 
-        session()->flash('message', 'Delivery scheduled successfully via Route Optimizer.');
-        $this->reset(['customer_name', 'address', 'latitude', 'longitude']);
+        session()->flash('message', 'Delivery scheduled successfully! Product will be delivered to customer.');
+        $this->reset(['customer_name', 'address', 'latitude', 'longitude', 'product_id', 'quantity', 'notes', 'resolved_address']);
+        $this->delivery_date = now()->format('Y-m-d');
+        $this->quantity = 1;
     }
 
     public function render()
     {
         return view('livewire.operations.create-delivery', [
-            'recentDeliveries' => Delivery::latest()->take(5)->get()
+            'recentDeliveries' => Delivery::with('product')->latest()->take(8)->get(),
+            'products' => Product::orderBy('name')->get()
         ]);
     }
 }

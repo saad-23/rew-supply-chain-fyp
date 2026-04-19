@@ -24,6 +24,24 @@
                 </div>
 
                 <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">Category <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <select wire:model="category_id" class="w-full py-3 px-4 rounded-lg border-2 border-gray-300 hover:border-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all duration-150 appearance-none bg-white cursor-pointer">
+                            <option value="">-- Select Category --</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    @error('category_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="mb-4">
                     <label class="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">SKU / Barcode <span class="text-red-500">*</span></label>
                     <div class="flex gap-2">
                         <div class="relative w-full">

@@ -16,10 +16,21 @@ class Delivery extends Model
         'longitude', 
         'priority', 
         'status', 
-        'delivery_date'
+        'delivery_date',
+        'product_id',
+        'quantity',
+        'notes'
     ];
 
     protected $casts = [
         'delivery_date' => 'date',
     ];
+
+    /**
+     * Get the product associated with this delivery
+     */
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Livewire\Products;
 
 use App\Models\Product;
+use App\Models\Category;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
@@ -14,6 +15,7 @@ class ProductForm extends Component
     public $sku = '';
     public $current_stock = '';
     public $price = '';
+    public $category_id = '';
 
     public function mount($productId = null)
     {
@@ -25,6 +27,7 @@ class ProductForm extends Component
                 $this->sku = $product->sku;
                 $this->current_stock = $product->current_stock;
                 $this->price = $product->price;
+                $this->category_id = $product->category_id;
             }
         }
     }
@@ -41,6 +44,7 @@ class ProductForm extends Component
             'sku' => $skuRule,
             'current_stock' => 'required|numeric|min:0',
             'price' => 'required|numeric|min:0',
+            'category_id' => 'required|exists:categories,id',
         ];
     }
 
@@ -55,6 +59,7 @@ class ProductForm extends Component
                 'sku' => $this->sku,
                 'current_stock' => $this->current_stock,
                 'price' => $this->price,
+                'category_id' => $this->category_id,
             ]);
             $message = 'Product updated successfully!';
         } else {
@@ -63,6 +68,7 @@ class ProductForm extends Component
                 'sku' => $this->sku,
                 'current_stock' => $this->current_stock,
                 'price' => $this->price,
+                'category_id' => $this->category_id,
             ]);
             $message = 'Product created successfully!';
         }
@@ -74,7 +80,8 @@ class ProductForm extends Component
     public function render()
     {
         return view('livewire.products.product-form', [
-            'recentProducts' => Product::latest()->take(5)->get()
+            'recentProducts' => Product::latest()->take(5)->get(),
+            'categories' => Category::orderBy('name')->get()
         ]);
     }
 }

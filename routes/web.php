@@ -48,11 +48,15 @@ Route::middleware(['auth'])->group(function () {
     // Route Optimization (FR5)
     Route::get('/routes', \App\Livewire\Logistics\RoutePlanner::class)->name('logistics.routes');
 
-    // Anomaly Detection (FR6, FR8)
-    Route::get('/alerts', \App\Livewire\Analytics\AnomalyMonitor::class)->name('analytics.alerts');
+    // Anomaly Detection & Alerts (FR6, FR8)
+    Route::get('/alerts', \App\Livewire\Analytics\AlertsDashboard::class)->name('analytics.alerts');
 
     // Operations (Data Entry)
     Route::get('/operations/sales', \App\Livewire\Operations\RecordSale::class)->name('operations.sales');
+    Route::get('/operations/create-delivery', \App\Livewire\Operations\CreateDelivery::class)->name('operations.create-delivery');
+    Route::get('/operations/manage-deliveries', \App\Livewire\Operations\ManageDeliveries::class)->name('operations.manage-deliveries');
+    
+    // Legacy route alias for backward compatibility
     Route::get('/operations/delivery', \App\Livewire\Operations\CreateDelivery::class)->name('operations.delivery');
 
     // System Administration

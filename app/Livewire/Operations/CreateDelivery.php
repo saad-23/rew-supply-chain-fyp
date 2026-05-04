@@ -4,174 +4,124 @@ namespace App\Livewire\Operations;
 
 use App\Models\Delivery;
 use App\Models\Product;
+use App\Models\Setting;
+use App\Services\GoogleMapsService;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
-use Illuminate\Support\Facades\Http;
 
 #[Layout('components.layouts.admin')]
 class CreateDelivery extends Component
 {
-    public $customer_name;
-    public $address;
-    public $latitude;
-    public $longitude;
-    public $resolved_address;
-    public $delivery_date;
-    public $priority = 1;
-    public $suggestions = [];
-    public $product_id;
-    public $quantity = 1;
-    public $notes;
-    public $showAdvanced = false;
+    // ── Destination (saved to DB) ──────────────────────────────
+    public string  $address          = '';
+    public ?float  $latitude         = null;
+    public ?float  $longitude        = null;
+    public ?string $resolved_address = null;
 
-    public function mount()
+    // ── Origin / warehouse (UI only, NOT saved to DB) ──────────
+    public string $origin_address = '';
+    public float  $origin_lat     = 31.5204;
+    public float  $origin_lng     = 74.3587;
+
+    // ── Form fields ────────────────────────────────────────────
+    public ?string $customer_name = null;
+    public string  $delivery_date = '';
+    public int     $priority      = 1;
+    public ?int    $product_id    = null;
+    public int     $quantity      = 1;
+    public ?string $notes         = null;
+
+    public function mount(): void
     {
         $this->delivery_date = now()->format('Y-m-d');
-    }
 
-    public function updatedAddress()
-    {
-        // Don't search if address is cleared or too short
-        if (strlen($this->address) < 3) {
-            $this->suggestions = [];
-            return;
-        }
+        // Pre-fill warehouse address from settings
+        $factory = Setting::where('key', 'factory_address')->value('value');
+        $this->origin_address = $factory ?: 'Main Warehouse, Lahore, Pakistan';
 
-        // Use Photon API for smarter suggestions
+        // Server-side geocode so the map centres on warehouse on load
         try {
-             $response = Http::get('https://photon.komoot.io/api/', [
-                'q' => $this->address,
-                'limit' => 5,
-                'lat' => 31.5204, // Location Bias: Lahore
-                'lon' => 74.3587,
-                'lang' => 'en'
-            ]);
-
-            if ($response->successful()) {
-                $features = $response->json()['features'] ?? [];
-                
-                $this->suggestions = array_map(function($f) {
-                    $props = $f['properties'];
-                    // Build a cleaner label
-                    $parts = array_filter([
-                        $props['name'] ?? null,
-                        $props['street'] ?? null,
-                        $props['district'] ?? null,
-                        $props['city'] ?? null,
-                        $props['state'] ?? null,
-                        $props['country'] ?? null
-                    ]);
-                    
-                    return [
-                        'display_name' => implode(', ', $parts),
-                        'lat' => $f['geometry']['coordinates'][1],
-                        'lon' => $f['geometry']['coordinates'][0],
-                        'type' => $props['osm_value'] ?? 'location'
-                    ];
-                }, $features);
+            $maps = app(GoogleMapsService::class);
+            if ($maps->isConfigured()) {
+                $geo = $maps->geocode($this->origin_address);
+                if ($geo) {
+                    $this->origin_lat     = $geo['lat'];
+                    $this->origin_lng     = $geo['lng'];
+                    $this->origin_address = $geo['formatted_address'];
+                }
             }
-        } catch (\Exception $e) {
-            $this->suggestions = [];
+        } catch (\Throwable) {
+            // Fallback coords already set above — silently continue
         }
     }
 
-    public function selectSuggestion($index)
+    /** Called from JS when user picks origin from Places autocomplete */
+    public function setOriginCoords(float $lat, float $lng, string $address): void
     {
-        if (isset($this->suggestions[$index])) {
-            $selected = $this->suggestions[$index];
-            $this->address = $selected['display_name']; // Update input text
-            $this->latitude = $selected['lat'];
-            $this->longitude = $selected['lon'];
-            $this->resolved_address = $selected['display_name'];
-            $this->suggestions = []; // Close dropdown
-        }
+        $this->origin_lat     = $lat;
+        $this->origin_lng     = $lng;
+        $this->origin_address = $address;
+    }
+
+    /** Called from JS when user picks destination from Places autocomplete */
+    public function setDestinationCoords(float $lat, float $lng, string $address): void
+    {
+        $this->latitude         = $lat;
+        $this->longitude        = $lng;
+        $this->address          = $address;
+        $this->resolved_address = $address;
     }
 
     protected $rules = [
         'customer_name' => 'required|string|max:255',
-        'address' => 'required|string|max:500',
-        'latitude' => 'required|numeric|between:-90,90',
-        'longitude' => 'required|numeric|between:-180,180',
+        'address'       => 'required|string|max:500',
+        'latitude'      => 'required|numeric|between:-90,90',
+        'longitude'     => 'required|numeric|between:-180,180',
         'delivery_date' => 'required|date',
-        'priority' => 'required|in:1,2',
-        'product_id' => 'required|exists:products,id',
-        'quantity' => 'required|integer|min:1',
-        'notes' => 'nullable|string|max:500',
+        'priority'      => 'required|in:1,2',
+        'product_id'    => 'required|exists:products,id',
+        'quantity'      => 'required|integer|min:1',
+        'notes'         => 'nullable|string|max:500',
     ];
 
-    // Geocode address using Photon (Komoot) for better fuzzy search
-    public function geocodeAddress()
-    {
-        if (empty($this->address)) return;
+    protected $messages = [
+        'latitude.required'  => 'Delivery address dropdown se select karen (map suggestion).',
+        'longitude.required' => 'Delivery address dropdown se select karen (map suggestion).',
+    ];
 
-        $this->resetErrorBag('address');
-        $this->resolved_address = null;
-
-        try {
-            // Photon API search
-            $response = Http::get('https://photon.komoot.io/api/', [
-                'q' => $this->address,
-                'limit' => 1,
-                'lat' => 31.5204, // Bias toward Lahore
-                'lon' => 74.3587
-            ]);
-
-            if ($response->successful() && !empty($response->json()['features'])) {
-                $feature = $response->json()['features'][0];
-                $props = $feature['properties'];
-                
-                $this->latitude = $feature['geometry']['coordinates'][1]; // Lat is index 1
-                $this->longitude = $feature['geometry']['coordinates'][0]; // Lon is index 0
-                
-                // Construct a nice display name
-                $parts = array_filter([
-                    $props['name'] ?? null,
-                    $props['street'] ?? null,
-                    $props['city'] ?? null,
-                    $props['state'] ?? null,
-                    $props['country'] ?? null
-                ]);
-                $this->resolved_address = implode(', ', $parts);
-                
-                // Update input if it was partial
-                $this->address = $this->resolved_address; 
-
-            } else {
-                $this->addError('address', 'Could not find coordinates. Please try a different spelling.');
-            }
-        } catch (\Exception $e) {
-            $this->addError('address', 'Geocoding service unavailable.');
-        }
-    }
-
-    public function save()
+    public function save(): void
     {
         $this->validate();
 
         Delivery::create([
             'customer_name' => $this->customer_name,
-            'address' => $this->address,
-            'latitude' => $this->latitude,
-            'longitude' => $this->longitude,
-            'status' => 'pending',
+            'address'       => $this->address,
+            'latitude'      => $this->latitude,
+            'longitude'     => $this->longitude,
+            'status'        => 'pending',
             'delivery_date' => $this->delivery_date,
-            'priority' => $this->priority,
-            'product_id' => $this->product_id,
-            'quantity' => $this->quantity,
-            'notes' => $this->notes,
+            'priority'      => $this->priority,
+            'product_id'    => $this->product_id,
+            'quantity'      => $this->quantity,
+            'notes'         => $this->notes,
         ]);
 
-        session()->flash('message', 'Delivery scheduled successfully! Product will be delivered to customer.');
-        $this->reset(['customer_name', 'address', 'latitude', 'longitude', 'product_id', 'quantity', 'notes', 'resolved_address']);
+        session()->flash('message', 'Delivery scheduled successfully!');
+        $this->reset(['customer_name', 'address', 'latitude', 'longitude',
+                      'product_id', 'notes', 'resolved_address']);
         $this->delivery_date = now()->format('Y-m-d');
-        $this->quantity = 1;
+        $this->quantity      = 1;
+        $this->priority      = 1;
     }
 
     public function render()
     {
+        $maps = app(GoogleMapsService::class);
         return view('livewire.operations.create-delivery', [
             'recentDeliveries' => Delivery::with('product')->latest()->take(8)->get(),
-            'products' => Product::orderBy('name')->get()
+            'products'         => Product::orderBy('name')->get(),
+            'mapsApiKey'       => $maps->getApiKey(),
+            'mapsReady'        => $maps->isConfigured(),
         ]);
     }
 }

@@ -22,7 +22,15 @@ class Login extends Component
 
         if (Auth::attempt(['email' => $this->email, 'password' => $this->password, 'is_active' => true], $this->remember)) {
             session()->regenerate();
-            return redirect()->route('admin.dashboard');
+
+            $user = Auth::user();
+
+            if ($user->isAdmin()) {
+                return redirect()->route('admin.dashboard');
+            }
+
+            // Staff / manager → shared dashboard
+            return redirect()->route('staff.dashboard');
         }
 
         $this->addError('email', 'The provided credentials do not match our records or account is inactive.');

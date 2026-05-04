@@ -1,5 +1,11 @@
 <?php
 
+// Security: this script must only run from the command line, never via web
+if (php_sapi_name() !== 'cli') {
+    http_response_code(403);
+    exit('Forbidden');
+}
+
 use App\Models\Product;
 use App\Models\Sale;
 use Carbon\Carbon;

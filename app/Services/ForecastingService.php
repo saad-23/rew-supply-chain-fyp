@@ -18,7 +18,8 @@ class ForecastingService
     public function __construct()
     {
         $this->mlServiceUrl = env('ML_SERVICE_URL', 'http://localhost:5000');
-        $this->mlServiceEnabled = env('ML_SERVICE_ENABLED', true);
+        // Cast to boolean explicitly — env() returns string "true"/"false" which PHP treats as truthy
+        $this->mlServiceEnabled = filter_var(env('ML_SERVICE_ENABLED', true), FILTER_VALIDATE_BOOLEAN);
     }
 
     /**

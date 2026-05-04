@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-gray-50">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-gray-50" x-data="{ darkMode: localStorage.getItem('darkMode') === 'true' }" :class="{ 'dark': darkMode }" x-init="$watch('darkMode', v => localStorage.setItem('darkMode', v))">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -20,12 +20,12 @@
     <style>
         [x-cloak] { display: none !important; }
         body { font-family: 'Inter', sans-serif; }
-        
-        /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+        html.dark body { background-color: #0f172a; }
+        html.dark .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; }
     </style>
 </head>
 <body class="h-full overflow-hidden" x-data="{ 
@@ -62,15 +62,17 @@
            }">
         
         <!-- Logo -->
-        <div class="h-16 flex items-center justify-between px-4 bg-slate-950/50 backdrop-blur-sm shadow-sm flex-shrink-0">
+        <div class="h-16 flex items-center justify-between px-4 bg-slate-950/60 backdrop-blur-sm shadow-sm flex-shrink-0">
             <div class="flex items-center gap-3 overflow-hidden">
-                <div class="h-8 w-8 rounded-lg bg-indigo-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-indigo-500/20">
+                <div class="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-600/30">
                      <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                 </div>
-                <span class="text-lg font-bold tracking-tight transition-opacity duration-300 whitespace-nowrap"
-                      :class="{ 'lg:opacity-0 lg:hidden': !sidebarOpen }">AdminPanel</span>
+                <div class="overflow-hidden transition-all duration-300" :class="{ 'lg:opacity-0 lg:w-0': !sidebarOpen }">
+                    <span class="text-sm font-bold tracking-tight text-white whitespace-nowrap">REW Supply</span>
+                    <p class="text-xs text-slate-400 whitespace-nowrap">Chain Manager</p>
+                </div>
             </div>
             <!-- Mobile Close Button -->
              <button @click="mobileSidebarOpen = false" class="lg:hidden text-gray-400 hover:text-white">
@@ -149,7 +151,8 @@
                 </div>
             </a>
 
-            <!-- Catalog -->
+            @if(auth()->user()->isAdmin())
+            <!-- Catalog (admin-only) -->
             <a href="{{ route('catalog.categories') }}" 
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group relative {{ request()->routeIs('catalog.categories') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="w-6 h-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -165,7 +168,23 @@
                 </div>
             </a>
 
-            <!-- Settings -->
+            <!-- Staff Management (admin-only) -->
+            <a href="{{ route('admin.staff') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group relative {{ request()->routeIs('admin.staff') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
+                <svg class="w-6 h-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="font-medium whitespace-nowrap transition-all duration-300"
+                      :class="{ 'lg:opacity-0 lg:hidden': !sidebarOpen }">
+                    Staff Management
+                </span>
+                <div class="absolute left-14 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none lg:block hidden z-50 whitespace-nowrap"
+                      x-show="!sidebarOpen">
+                    Staff Management
+                </div>
+            </a>
+
+            <!-- Settings (admin-only) -->
             <a href="{{ route('settings') }}" 
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group relative {{ request()->routeIs('settings') ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                 <svg class="w-6 h-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -181,6 +200,7 @@
                     Settings
                 </div>
             </a>
+            @endif
 
             <!-- Profile -->
             <a href="{{ route('profile') }}" 
@@ -273,16 +293,23 @@
         <!-- Sidebar Footer -->
         <div class="p-4 border-t border-slate-800">
             <div class="flex items-center gap-3">
-                 <div class="relative">
-                     <img class="h-9 w-9 rounded-full object-cover border-2 border-indigo-500" 
-                         src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" 
-                         alt="User avatar">
-                     <span class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-slate-900"></span>
+                 <div class="relative flex-shrink-0">
+                     <img class="h-9 w-9 rounded-full object-cover border-2 border-blue-500"
+                         src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=2563eb&color=fff"
+                         alt="{{ auth()->user()->name ?? 'Admin' }}">
+                     <span class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-400 ring-2 ring-slate-900"></span>
                  </div>
                 <div class="overflow-hidden transition-all duration-300"
                      :class="{ 'lg:opacity-0 lg:w-0': !sidebarOpen }">
-                    <p class="text-sm font-medium text-white truncate">Administrator</p>
-                    <p class="text-xs text-slate-400 truncate">admin@rewsystem.com</p>
+                    <p class="text-sm font-semibold text-white truncate">{{ auth()->user()->name ?? 'User' }}</p>
+                    <p class="text-xs text-slate-400 truncate">{{ auth()->user()->email ?? '' }}</p>
+                    <p class="text-xs mt-0.5">
+                        @if(auth()->user()->isAdmin())
+                            <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-600 text-white">ADMIN</span>
+                        @else
+                            <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-600 text-slate-200">STAFF</span>
+                        @endif
+                    </p>
                 </div>
             </div>
         </div>
@@ -293,7 +320,7 @@
          :class="{ 'lg:ml-72': sidebarOpen, 'lg:ml-20': !sidebarOpen }">
         
         <!-- Header -->
-        <header class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+        <header class="h-16 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-gray-200 dark:border-slate-700 sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8">
             <div class="flex items-center gap-4">
                 <button @click="toggleSidebar()" class="text-gray-500 hover:text-indigo-600 focus:outline-none transition-colors">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -301,22 +328,17 @@
                     </svg>
                 </button>
                 
-                <!-- Search -->
-                <div class="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-1.5 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:bg-white transition-all w-64 lg:w-96">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input type="text" placeholder="Search products, orders..." class="bg-transparent border-none focus:ring-0 text-sm text-gray-700 w-full ml-2 placeholder-gray-400">
-                </div>
+               
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
+                
                 @livewire('components.header-notifications')
-                <div class="h-8 w-px bg-gray-200"></div>
+                <div class="h-8 w-px bg-gray-200 dark:bg-slate-700"></div>
                  <div class="relative" x-data="{ userMenu: false }">
-                    <button @click="userMenu = !userMenu" class="flex items-center gap-2 focus:outline-none">
-                         <img class="h-8 w-8 rounded-full object-cover border border-gray-200" src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User">
-                         <span class="text-sm font-medium text-gray-700 hidden sm:block">Admin</span>
+                    <button @click="userMenu = !userMenu" class="flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg px-1 py-0.5" aria-haspopup="true" aria-expanded="false">
+                         <img class="h-8 w-8 rounded-full object-cover border-2 border-blue-200" src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=2563eb&color=fff" alt="{{ auth()->user()->name ?? 'Admin' }}">
+                         <span class="text-sm font-semibold text-gray-700 dark:text-slate-200 hidden sm:block">{{ auth()->user()->name ?? 'Admin' }}</span>
                          <svg class="w-4 h-4 text-gray-400 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
@@ -329,13 +351,26 @@
                          x-transition:leave="transition ease-in duration-75"
                          x-transition:leave-start="transform opacity-100 scale-100"
                          x-transition:leave-end="transform opacity-0 scale-95"
-                         class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 py-1 z-50 origin-top-right font-light">
-                        <a href="{{ route('profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Your Profile</a>
-                        <a href="{{ route('settings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Settings</a>
-                        <div class="border-t border-gray-100 my-1"></div>
+                         class="absolute right-0 mt-2 w-52 bg-white dark:bg-slate-800 rounded-xl shadow-xl ring-1 ring-black/5 dark:ring-slate-700 py-1 z-50 origin-top-right">
+                        <div class="px-4 py-2 border-b border-gray-100 dark:border-slate-700">
+                            <p class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{{ auth()->user()->name ?? 'Administrator' }}</p>
+                            <p class="text-xs text-slate-400 truncate">{{ auth()->user()->email ?? '' }}</p>
+                        </div>
+                        <a href="{{ route('profile') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            Your Profile
+                        </a>
+                        <a href="{{ route('settings') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            Settings
+                        </a>
+                        <div class="border-t border-gray-100 dark:border-slate-700 my-1"></div>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Sign out</button>
+                            <button type="submit" class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                Sign out
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -343,21 +378,32 @@
         </header>
 
         <!-- Content Area -->
-        <main class="flex-1 overflow-auto bg-gray-50 p-4 sm:p-6 lg:p-8">
+        <main class="flex-1 overflow-auto bg-gray-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8">
              @if (session('status'))
-                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" 
-                     class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-md shadow-sm flex items-start justify-between">
-                    <div class="flex items-center gap-3">
-                         <svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <p class="text-sm font-medium text-green-800">{{ session('status') }}</p>
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+                     x-transition:leave="transition ease-in duration-300"
+                     x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 -translate-y-2"
+                     class="alert-success mb-6 shadow-sm justify-between" role="alert">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>{{ session('status') }}</span>
                     </div>
-                    <button @click="show = false" class="text-green-600 hover:text-green-800">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                    <button @click="show = false" class="btn-icon ml-4 flex-shrink-0" aria-label="Dismiss">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
+                </div>
+            @endif
+            @if (session('error'))
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 6000)"
+                     x-transition:leave="transition ease-in duration-300"
+                     x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                     class="alert-error mb-6 shadow-sm justify-between" role="alert">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.834-1.962-.834-2.732 0L3.072 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+                        <span>{{ session('error') }}</span>
+                    </div>
+                    <button @click="show = false" class="btn-icon ml-4" aria-label="Dismiss"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
                 </div>
             @endif
 
@@ -406,6 +452,7 @@
         });
     </script>
 
+    @stack('scripts')
     @livewireScripts
 </body>
 </html>

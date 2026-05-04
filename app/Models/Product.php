@@ -10,9 +10,18 @@ class Product extends Model
         'name',
         'sku',
         'current_stock',
+        'low_stock_threshold',
         'price',
         'category_id',
     ];
+
+    /**
+     * Returns true if stock is at or below the configured threshold.
+     */
+    public function isLowStock(): bool
+    {
+        return $this->current_stock <= $this->low_stock_threshold;
+    }
 
     public function category()
     {

@@ -46,9 +46,9 @@
                                class="w-4 h-4 text-indigo-600 border-2 border-gray-400 rounded focus:ring-2 focus:ring-indigo-500 cursor-pointer transition-all">
                         <span class="ml-2.5 text-sm text-gray-700 font-medium group-hover:text-indigo-600 transition-colors">Remember me</span>
                     </label>
-                    <a href="{{ route('password.request') }}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 hover:underline underline-offset-2 transition-all">
+                    {{-- <a href="{{ route('password.request') }}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 hover:underline underline-offset-2 transition-all">
                         Forgot password?
-                    </a>
+                    </a> --}}
                 </div>
 
                 <!-- Login Button -->
@@ -60,7 +60,7 @@
                     </svg>
                 </button>
 
-                <!-- Register Link -->
+                {{-- <!-- Register Link -->
                 <div class="text-center pt-3">
                     <p class="text-sm text-gray-600">
                         Don't have an account? 
@@ -68,7 +68,7 @@
                             Create account
                         </a>
                     </p>
-                </div>
+                </div> --}}
             </form>
 
             <!-- Footer -->

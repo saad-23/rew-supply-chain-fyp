@@ -99,10 +99,10 @@ def generate_forecast():
                 'error': 'product_id is required'
             }), 400
         
-        if not isinstance(days, int) or days < 1 or days > 365:
+        if not isinstance(days, int) or days < 1 or days > 730:
             return jsonify({
                 'success': False,
-                'error': 'days must be an integer between 1 and 365'
+                'error': 'days must be an integer between 1 and 730'
             }), 400
         
         logger.info(f"Generating forecast for product {product_id} for {days} days")

@@ -1,10 +1,10 @@
 <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-lg w-full bg-white p-8 rounded-2xl shadow-2xl border border-gray-200">
         <!-- Header -->
-        <div class="text-center mb-6">
-            <div class="inline-flex w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl items-center justify-center shadow-xl mb-4 hover:scale-105 transition-transform duration-300">
-                <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-14 h-14 bg-indigo-100 rounded-xl mb-4">
+                <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
             </div>
             <h2 class="text-3xl font-bold text-gray-900 mb-2">
@@ -66,7 +66,6 @@
                            class="px-4 w-full py-3.5 text-base rounded-lg border-2 border-gray-300 hover:border-indigo-400 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 transition-all duration-300 bg-white text-gray-900 font-medium placeholder-gray-500" 
                            placeholder="••••••••">
                 </div>
-            </div>
 
             <div class="pt-2">
                 <button type="submit" 

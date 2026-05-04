@@ -4,6 +4,12 @@
  * Run: php test-ml-integration.php
  */
 
+// Security: CLI only — never expose via web
+if (php_sapi_name() !== 'cli') {
+    http_response_code(403);
+    exit('Forbidden');
+}
+
 require __DIR__.'/vendor/autoload.php';
 
 $app = require_once __DIR__.'/bootstrap/app.php';

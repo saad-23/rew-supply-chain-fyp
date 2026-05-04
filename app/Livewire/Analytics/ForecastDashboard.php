@@ -19,7 +19,9 @@ class ForecastDashboard extends Component
     public $forecastData = [];
     public $labels = [];
     public $isGenerating = false;
-    public $forecastDays = 90; // 3 months forecast
+    public $forecastDays = 90;
+    public string $forecastPeriod = '3months'; // 3months | 6months | 12months | custom
+    public int $customDays = 90;
     public $errorMessage = null;
     public $successMessage = null;
     public $mlServiceStatus = 'unknown'; // unknown, available, unavailable
@@ -61,6 +63,38 @@ class ForecastDashboard extends Component
         }
     }
     
+    /**
+     * Map period key to number of days
+     */
+    private function periodToDays(): int
+    {
+        return match ($this->forecastPeriod) {
+            '3months'  => 90,
+            '6months'  => 180,
+            '12months' => 365,
+            'custom'   => max(1, min(730, $this->customDays)),
+            default    => 90,
+        };
+    }
+
+    public function updatedForecastPeriod(): void
+    {
+        $this->forecastDays = $this->periodToDays();
+        $this->errorMessage = null;
+        $this->successMessage = null;
+        $this->loadData();
+    }
+
+    public function updatedCustomDays(): void
+    {
+        if ($this->forecastPeriod === 'custom') {
+            $this->forecastDays = $this->periodToDays();
+            $this->errorMessage = null;
+            $this->successMessage = null;
+            $this->loadData();
+        }
+    }
+
     public function updatedSelectedProductId()
     {
         try {
@@ -308,14 +342,23 @@ class ForecastDashboard extends Component
                 }
             }
             
+            $periodLabel = match ($this->forecastPeriod) {
+                '3months'  => 'Next 3 Months',
+                '6months'  => 'Next 6 Months',
+                '12months' => 'Next 12 Months',
+                'custom'   => "Next {$this->forecastDays} Days",
+                default    => 'Next 3 Months',
+            };
+
             return view('livewire.analytics.forecast-dashboard', [
-                'products' => Product::all(),
-                'product' => $product,
+                'products'     => Product::all(),
+                'product'      => $product,
                 'optimization' => $optimization,
                 'totalForecast' => $totalForecast,
-                'avgDaily' => $avgDaily,
-                'modelUsed' => $modelUsed,
-                'salesCount' => $salesCount,
+                'avgDaily'     => $avgDaily,
+                'modelUsed'    => $modelUsed,
+                'salesCount'   => $salesCount,
+                'periodLabel'  => $periodLabel,
             ]);
             
         } catch (\Exception $e) {

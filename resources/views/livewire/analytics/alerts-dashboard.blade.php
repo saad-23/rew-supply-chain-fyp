@@ -40,9 +40,9 @@
                     <p class="text-4xl font-bold mt-2">{{ $criticalCount }}</p>
                     <p class="text-red-100 text-sm mt-1">Requires immediate attention</p>
                 </div>
-                <div class="p-4 rounded-full bg-white bg-opacity-20">
-                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                <div class="p-3 rounded-xl bg-white/20 flex-shrink-0">
+                    <svg class="w-9 h-9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
                 </div>
             </div>
@@ -55,9 +55,9 @@
                     <p class="text-4xl font-bold mt-2">{{ $highCount }}</p>
                     <p class="text-orange-100 text-sm mt-1">Action needed soon</p>
                 </div>
-                <div class="p-4 rounded-full bg-white bg-opacity-20">
-                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                <div class="p-3 rounded-xl bg-white/20 flex-shrink-0">
+                    <svg class="w-9 h-9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                     </svg>
                 </div>
             </div>
@@ -70,9 +70,9 @@
                     <p class="text-4xl font-bold mt-2">{{ $totalUnresolved }}</p>
                     <p class="text-blue-100 text-sm mt-1">Unresolved issues</p>
                 </div>
-                <div class="p-4 rounded-full bg-white bg-opacity-20">
-                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                <div class="p-3 rounded-xl bg-white/20 flex-shrink-0">
+                    <svg class="w-9 h-9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                     </svg>
                 </div>
             </div>
@@ -80,11 +80,12 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6">
+    <div class="card card-body mb-6">
         <div class="flex flex-col md:flex-row gap-4 items-start md:items-center">
             <div class="flex items-center gap-3">
-                <label class="text-sm font-semibold text-gray-700 dark:text-gray-300">Filter by Severity:</label>
-                <select wire:model.live="filter" class="rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-4">
+                <label for="alert-filter" class="form-label mb-0">Severity:</label>
+                <select id="alert-filter" wire:model.live="filter"
+                        class="select-enhanced w-auto" aria-label="Filter alerts by severity">
                     <option value="all">All Alerts</option>
                     <option value="critical">Critical Only</option>
                     <option value="high">High Priority</option>
@@ -92,91 +93,85 @@
                     <option value="low">Low</option>
                 </select>
             </div>
-
             <div class="flex items-center gap-2">
-                <input type="checkbox" wire:model.live="showResolved" id="showResolved" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                <label for="showResolved" class="text-sm text-gray-700 dark:text-gray-300">Show resolved alerts</label>
+                <input type="checkbox" wire:model.live="showResolved" id="showResolved"
+                       class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                       aria-label="Show resolved alerts">
+                <label for="showResolved" class="text-sm font-medium text-slate-600 dark:text-slate-300 cursor-pointer">Show resolved alerts</label>
             </div>
         </div>
     </div>
 
     <!-- Alerts List -->
-    <div class="space-y-4">
+    <div class="space-y-3">
         @forelse($alerts as $alert)
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border-l-4 
+            <div class="card p-5 border-l-4
                 {{ $alert->severity === 'critical' ? 'border-red-500' : '' }}
-                {{ $alert->severity === 'high' ? 'border-orange-500' : '' }}
-                {{ $alert->severity === 'medium' ? 'border-yellow-500' : '' }}
-                {{ $alert->severity === 'low' ? 'border-blue-500' : '' }}
-                {{ $alert->is_resolved ? 'opacity-60' : '' }}">
+                {{ $alert->severity === 'high'     ? 'border-orange-500' : '' }}
+                {{ $alert->severity === 'medium'   ? 'border-amber-400' : '' }}
+                {{ $alert->severity === 'low'      ? 'border-blue-400' : '' }}
+                {{ $alert->is_resolved ? 'opacity-60' : '' }}
+                {{ $alert->severity === 'critical' && !$alert->is_resolved ? 'shadow-red-100 dark:shadow-red-900/20' : '' }}"
+                role="article" aria-label="Alert: {{ $alert->severity }} severity">
                 
-                <div class="flex items-start justify-between">
+                <div class="flex items-start justify-between gap-4">
                     <div class="flex items-start gap-4 flex-1">
-                        <!-- Icon -->
-                        <div class="p-3 rounded-lg flex-shrink-0
-                            {{ $alert->severity === 'critical' ? 'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300' : '' }}
-                            {{ $alert->severity === 'high' ? 'bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-300' : '' }}
-                            {{ $alert->severity === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-300' : '' }}
-                            {{ $alert->severity === 'low' ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300' : '' }}">
+                        <!-- Severity Icon -->
+                        <div class="p-3 rounded-xl flex-shrink-0
+                            {{ $alert->severity === 'critical' ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400' : '' }}
+                            {{ $alert->severity === 'high'     ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' : '' }}
+                            {{ $alert->severity === 'medium'   ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' : '' }}
+                            {{ $alert->severity === 'low'      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : '' }}">
                             @if($alert->type === 'low_stock')
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                                </svg>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                             @elseif($alert->type === 'delivery_delay')
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path>
-                                </svg>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
                             @else
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                                </svg>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                             @endif
                         </div>
 
                         <!-- Content -->
-                        <div class="flex-1">
-                            <div class="flex items-center gap-3 mb-2">
-                                <span class="text-xs font-semibold px-3 py-1 rounded-full uppercase
-                                    {{ $alert->severity === 'critical' ? 'bg-red-100 text-red-800' : '' }}
-                                    {{ $alert->severity === 'high' ? 'bg-orange-100 text-orange-800' : '' }}
-                                    {{ $alert->severity === 'medium' ? 'bg-yellow-100 text-yellow-800' : '' }}
-                                    {{ $alert->severity === 'low' ? 'bg-blue-100 text-blue-800' : '' }}">
-                                    {{ $alert->severity }}
-                                </span>
-                                <span class="text-xs text-gray-500">{{ $alert->detected_at->diffForHumans() }}</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                                <span class="badge-{{ $alert->severity }}">{{ strtoupper($alert->severity) }}</span>
                                 @if($alert->is_resolved)
-                                    <span class="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-800">RESOLVED</span>
+                                    <span class="badge-green">RESOLVED</span>
+                                @endif
+                                <span class="text-xs text-slate-400">{{ $alert->detected_at->diffForHumans() }}</span>
+                                @if(isset($alert->anomaly_score) && $alert->anomaly_score)
+                                    <span class="text-xs text-slate-400" data-tooltip="Anomaly Score: statistical deviation from expected demand pattern. Higher = more unusual.">Score: {{ number_format($alert->anomaly_score, 2) }}
+                                        <svg class="inline w-3 h-3 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    </span>
                                 @endif
                             </div>
-                            <p class="text-gray-800 dark:text-gray-200 font-medium">{{ ucfirst(str_replace('_', ' ', $alert->type)) }}</p>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ $alert->description }}</p>
+                            <p class="font-semibold text-slate-800 dark:text-slate-200 text-sm">{{ ucfirst(str_replace('_', ' ', $alert->type)) }}</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{{ $alert->description }}</p>
                         </div>
                     </div>
 
                     <!-- Actions -->
-                    <div class="flex items-center gap-2 ml-4">
+                    <div class="flex items-center gap-2 flex-shrink-0">
                         @if(!$alert->is_resolved)
-                            <button wire:click="resolveAlert({{ $alert->id }})" 
-                                    class="px-4 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-sm font-medium transition-all">
-                                Resolve
+                            <button wire:click="resolveAlert({{ $alert->id }})" wire:loading.attr="disabled"
+                                    class="btn-success btn-sm" aria-label="Resolve alert">
+                                <span wire:loading.remove wire:target="resolveAlert({{ $alert->id }})">Resolve</span>
+                                <span wire:loading wire:target="resolveAlert({{ $alert->id }})" class="btn-spinner"></span>
                             </button>
                         @endif
-                        <button wire:click="deleteAlert({{ $alert->id }})" 
+                        <button wire:click="deleteAlert({{ $alert->id }})"
                                 wire:confirm="Are you sure you want to delete this alert?"
-                                class="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium transition-all">
-                            Delete
+                                class="btn-danger btn-sm" aria-label="Delete alert">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
                     </div>
                 </div>
             </div>
         @empty
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center">
-                <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <p class="text-lg font-semibold text-gray-600 dark:text-gray-400">No alerts found</p>
-                <p class="text-sm text-gray-500 mt-2">Your system is running smoothly!</p>
+            <div class="card p-16 text-center">
+                <svg class="w-16 h-16 mx-auto text-slate-200 dark:text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p class="text-base font-semibold text-slate-600 dark:text-slate-400">No alerts found</p>
+                <p class="text-sm text-slate-400 mt-1">Your system is running smoothly!</p>
             </div>
         @endforelse
     </div>

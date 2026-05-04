@@ -19,9 +19,28 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'company_name',
         'email',
         'password',
+        'role',
+        'is_active',
     ];
+
+    /**
+     * Returns true if user has admin role.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Returns true if user has staff or manager role.
+     */
+    public function isStaff(): bool
+    {
+        return in_array($this->role, ['staff', 'manager']);
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -43,6 +62,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 }

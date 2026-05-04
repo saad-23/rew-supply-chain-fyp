@@ -10,24 +10,26 @@ use Livewire\Attributes\Layout;
 #[Layout('components.layouts.admin')]
 class ProductForm extends Component
 {
-    public $productId = null;
-    public $name = '';
-    public $sku = '';
-    public $current_stock = '';
-    public $price = '';
-    public $category_id = '';
+    public $productId          = null;
+    public $name               = '';
+    public $sku                = '';
+    public $current_stock      = '';
+    public $low_stock_threshold = 10;
+    public $price              = '';
+    public $category_id        = '';
 
     public function mount($productId = null)
     {
         if ($productId) {
             $product = Product::find($productId);
             if ($product) {
-                $this->productId = $product->id;
-                $this->name = $product->name;
-                $this->sku = $product->sku;
-                $this->current_stock = $product->current_stock;
-                $this->price = $product->price;
-                $this->category_id = $product->category_id;
+                $this->productId           = $product->id;
+                $this->name               = $product->name;
+                $this->sku                = $product->sku;
+                $this->current_stock      = $product->current_stock;
+                $this->low_stock_threshold = $product->low_stock_threshold ?? 10;
+                $this->price              = $product->price;
+                $this->category_id        = $product->category_id;
             }
         }
     }
@@ -40,11 +42,12 @@ class ProductForm extends Component
         }
 
         return [
-            'name' => 'required|string|max:255',
-            'sku' => $skuRule,
-            'current_stock' => 'required|numeric|min:0',
-            'price' => 'required|numeric|min:0',
-            'category_id' => 'required|exists:categories,id',
+            'name'               => 'required|string|max:255',
+            'sku'                => $skuRule,
+            'current_stock'      => 'required|numeric|min:0',
+            'low_stock_threshold' => 'required|integer|min:1',
+            'price'              => 'required|numeric|min:0',
+            'category_id'        => 'required|exists:categories,id',
         ];
     }
 
@@ -55,20 +58,22 @@ class ProductForm extends Component
         if ($this->productId) {
             $product = Product::find($this->productId);
             $product->update([
-                'name' => $this->name,
-                'sku' => $this->sku,
-                'current_stock' => $this->current_stock,
-                'price' => $this->price,
-                'category_id' => $this->category_id,
+                'name'               => $this->name,
+                'sku'                => $this->sku,
+                'current_stock'      => $this->current_stock,
+                'low_stock_threshold' => $this->low_stock_threshold,
+                'price'              => $this->price,
+                'category_id'        => $this->category_id,
             ]);
             $message = 'Product updated successfully!';
         } else {
             Product::create([
-                'name' => $this->name,
-                'sku' => $this->sku,
-                'current_stock' => $this->current_stock,
-                'price' => $this->price,
-                'category_id' => $this->category_id,
+                'name'               => $this->name,
+                'sku'                => $this->sku,
+                'current_stock'      => $this->current_stock,
+                'low_stock_threshold' => $this->low_stock_threshold,
+                'price'              => $this->price,
+                'category_id'        => $this->category_id,
             ]);
             $message = 'Product created successfully!';
         }

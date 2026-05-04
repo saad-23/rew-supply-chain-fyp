@@ -1,93 +1,71 @@
 <div class="p-6">
-    <div class="flex justify-between items-center mb-6">
+    <!-- Page Header -->
+    <div class="page-header">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">My Profile</h1>
-            <p class="text-sm text-gray-500">Manage your account settings</p>
+            <h1 class="page-title">My Profile</h1>
+            <p class="page-subtitle">Manage your account settings and password</p>
         </div>
     </div>
 
-    <div class="max-w-3xl bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+    <div class="max-w-3xl card card-body">
         @if (session()->has('message'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6">
-                {{ session('message') }}
+            <div class="alert-success mb-6">
+                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                <span>{{ session('message') }}</span>
             </div>
         @endif
 
         <form wire:submit="updateProfile">
             <div class="grid grid-cols-1 gap-6">
                 <!-- Avatar Section (Visual only for now) -->
-                <div class="flex items-center space-x-6">
-                    <div class="shrink-0">
-                        <div class="h-24 w-24 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-500 text-3xl font-bold">
-                            {{ substr($name, 0, 1) }}
-                        </div>
+                <div class="flex items-center gap-5">
+                    <div class="h-20 w-20 rounded-2xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400 text-3xl font-bold flex-shrink-0">
+                        {{ strtoupper(substr($name, 0, 1)) }}
                     </div>
                     <div>
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ $name }}</h3>
-                        <p class="text-sm text-gray-500">Administrator</p>
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ $name }}</h3>
+                        <span class="badge-blue mt-1">Administrator</span>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">Full Name</label>
-                        <div class="relative rounded-md shadow-sm">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                            </div>
-                            <input type="text" wire:model="name" class="pl-10 w-full py-3 rounded-lg border-2 border-gray-300 hover:border-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all duration-150">
-                        </div>
-                        @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        <label class="form-label">Full Name</label>
+                        <input type="text" wire:model="name" class="input-enhanced @error('name') error @enderror" placeholder="Full name" aria-label="Full name">
+                        @error('name') <p class="field-error">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">Email Address</label>
-                        <div class="relative rounded-md shadow-sm">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <input type="email" wire:model="email" class="pl-10 w-full py-3 rounded-lg border-2 border-gray-300 hover:border-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all duration-150">
-                        </div>
-                        @error('email') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        <label class="form-label">Email Address</label>
+                        <input type="email" wire:model="email" class="input-enhanced @error('email') error @enderror" placeholder="Email address" aria-label="Email address">
+                        @error('email') <p class="field-error">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
-                <div class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-2">
-                    <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">Change Password</h3>
+                <div class="border-t border-slate-200 dark:border-slate-700 pt-6 mt-2">
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-blue-600 mb-4">Change Password</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <div>
-                            <label class="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">New Password</label>
-                            <div class="relative rounded-md shadow-sm">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                    </svg>
-                                </div>
-                                <input type="password" wire:model="password" class="pl-10 w-full py-3 rounded-lg border-2 border-gray-300 hover:border-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all duration-150" placeholder="Leave blank to keep current">
-                            </div>
-                            @error('password') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        <div>
+                            <label class="form-label">New Password</label>
+                            <input type="password" wire:model="password" class="input-enhanced @error('password') error @enderror" placeholder="Leave blank to keep current" aria-label="New password">
+                            @error('password') <p class="field-error">{{ $message }}</p> @enderror
                         </div>
-                         <div>
-                            <label class="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">Confirm Password</label>
-                            <div class="relative rounded-md shadow-sm">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </div>
-                                <input type="password" wire:model="password_confirmation" class="pl-10 w-full py-3 rounded-lg border-2 border-gray-300 hover:border-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-all duration-150" placeholder="Retype new password">
-                             </div>
+                        <div>
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" wire:model="password_confirmation" class="input-enhanced" placeholder="Retype new password" aria-label="Confirm new password">
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="mt-8 flex justify-end">
-                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105">
-                    Update Profile
+                <button type="submit" class="btn-primary btn-lg" aria-label="Update profile">
+                    <span wire:loading.remove wire:target="updateProfile">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Update Profile
+                    </span>
+                    <span wire:loading wire:target="updateProfile" class="flex items-center gap-2">
+                        <span class="btn-spinner"></span> Saving…
+                    </span>
                 </button>
             </div>
         </form>

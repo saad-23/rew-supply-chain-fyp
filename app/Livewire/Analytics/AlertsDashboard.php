@@ -40,9 +40,8 @@ class AlertsDashboard extends Component
     public function generateSystemAlerts()
     {
         try {
-            // 1. Low Stock Alerts
-            $lowStockProducts = Product::whereRaw('current_stock < (price / 10)') // Simple threshold
-                ->get();
+            // 1. Low Stock Alerts — uses per-product threshold (not price/10)
+            $lowStockProducts = Product::whereColumn('current_stock', '<=', 'low_stock_threshold')->get();
 
             foreach ($lowStockProducts as $product) {
                 $forecast = DemandForecast::where('product_id', $product->id)
@@ -50,22 +49,26 @@ class AlertsDashboard extends Component
                     ->where('forecast_date', '<=', now()->addDays(7))
                     ->sum('predicted_quantity');
 
-                $severity = 'medium';
-                if ($product->current_stock < $forecast) {
+                // Severity based on stock vs forecasted 7-day demand
+                if ($product->current_stock == 0) {
                     $severity = 'critical';
-                } elseif ($product->current_stock < ($forecast * 1.5)) {
+                } elseif ($forecast > 0 && $product->current_stock < $forecast) {
+                    $severity = 'critical';
+                } elseif ($forecast > 0 && $product->current_stock < ($forecast * 1.5)) {
                     $severity = 'high';
+                } else {
+                    $severity = 'medium';
                 }
 
                 Anomaly::firstOrCreate(
                     [
-                        'type' => 'low_stock',
-                        'description' => "Low stock alert for {$product->name}. Current: {$product->current_stock} units, 7-day demand: " . round($forecast) . " units",
-                        'is_resolved' => false
+                        'type'        => 'low_stock',
+                        'description' => "Low stock alert for {$product->name}. Current: {$product->current_stock} units (threshold: {$product->low_stock_threshold}), 7-day demand: " . round($forecast) . " units",
+                        'is_resolved' => false,
                     ],
                     [
-                        'severity' => $severity,
-                        'detected_at' => now()
+                        'severity'    => $severity,
+                        'detected_at' => now(),
                     ]
                 );
             }
